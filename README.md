@@ -1,0 +1,2 @@
+# fanslate
+Chinese English Dictionary
