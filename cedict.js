@@ -44,14 +44,23 @@ var cedict = function() {
 	"yun",								"lün",				"jun",	"qun",	"xun",
 	"yong",												"jiong",	"qiong",	"xiong"]
 
+	function uColonToUe(sil) {
+		
+	}
 
 	// takes "tong3" to "tong"
 	function placeTone(silable) {
+		if (/^[a-zA-Z·,]$/.test(silable)) { return silable; }
 		var sil = silable.slice(0,-1);
+		if (sil == "r") { return sil; }
+		sil = sil.replace("u:", "ü");
 		var tone = silable.slice(-1);
 		var tone = parseInt(tone);
-		if (/^[a-zA-Z·,]$/.test(silable)) { return silable; }
-		if (silableList.indexOf(sil) === -1 || isNaN(tone)) { alert(silable + " is not a proper silable"); }
+		if (
+			(silableList.indexOf(sil) === -1
+			&& (silableList.indexOf(sil.slice(0,-1)) === -1 || sil[-1] !="r")
+			)
+			|| isNaN(tone)) { alert(silable + " is not a proper silable"); }
 		
 		var tonePos = null;
 		var indexA = sil.indexOf("a");
@@ -59,10 +68,12 @@ var cedict = function() {
 		var indexO = sil.indexOf("o");
 		var indexI = sil.indexOf("i");
 		var indexU = sil.indexOf("u");
+		var indexV = sil.indexOf("v");
 		
 		if (indexA != -1) { tonePos = indexA; }
 		else if (indexE != -1) { tonePos = indexE; }
 		else if (indexO != -1) { tonePos = indexO; }
+		else if (indexV != -1) { tonePos = indexV; }
 		else { tonePos = Math.max(indexI, indexU); }
 		
 		var accent = null;
@@ -82,7 +93,7 @@ var cedict = function() {
 		var rest = line;
 		var index = null;
 		var index2 = null;
-		if (rest.substring(0,1) === "#") { return null; }
+		if (rest.substring(0,1) === "#" || rest === "") { return null; }
 		index = rest.indexOf(" ");
 		var traditional = rest.substring(0,index);
 		rest = rest.substring(index+1,rest.length);
@@ -92,9 +103,9 @@ var cedict = function() {
 		index = rest.indexOf("[");
 		index2 = rest.indexOf("]");
 		var pinyin = rest.substring(index+1, index2);
-		pinyin = pinyin.split(" ").map(function(sil) { return placeTone(sil.toLowerCase()) ;}).join("");
+		pinyin = pinyin.split(" ").map(function(sil) { return placeTone(sil.toLowerCase()) ;}).join("<wbr />");
 		rest = rest.substring(index2+2,rest.length);
-		var english = rest.substring(1,rest.length-1);
+		var english = rest.substring(1,rest.length-1).split("/").join("/<br />");
 		return { traditional: traditional, simplified: simplified, pinyin: pinyin, english: english }
 	}
 	
@@ -104,12 +115,12 @@ var cedict = function() {
 		var input = document.getElementById("input");
 		input.oninput= function () {
 			var output = document.getElementById("output");
-			var res = (text.match(new RegExp("^.*" + input.value + ".*$","mg"))||["noResult noResult [,] /no results/"]);
+			var res = (text.match(new RegExp("^.*" + input.value + ".*$","mgi"))||["noResult noResult [,] /no results/"]);
 			output.innerHTML = res.slice(0,25).map(function(r) {
 				var r = parseLine(r);
 				if (r == null) { return ""; }
-				return "<tr>"+
-					"<td><span style=\"white-space: nowrap;\">" + r.simplified + "</span></td>" +
+				return "<tr class=\"dict_entry\">"+
+					"<td>" + r.simplified + "</td>" +
 					"<td>" + r.pinyin + "</td>" +
 					"<td>" + r.english +"</td>" + "</tr>"; }).join("");
 		};

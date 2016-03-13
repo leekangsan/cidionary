@@ -1,0 +1,19 @@
+.tab
+{
+	display: table-cell;
+	text-align: center;
+	cursor: pointer;
+	font-size: 18pt;
+}
+.dict_entry
+{
+	border-bottom: 1px solid black;
+}
+#single_char
+{
+	cursor: pointer;
+}
+#input
+{
+	font-size: 18pt;
+}

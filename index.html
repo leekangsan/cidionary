@@ -1,17 +1,31 @@
 <!DOCTYPE html>
-<html manifest="fanslate.appcache">
+<html> <!-- manifest="fanslate.appcache" -->
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="default.css"></link>
 </head>
-<body>
-<form><input id="input"></input></form>
-<div id="canvas_input">
-	<button id="clear_button">clear!</button><br></br>
-	<canvas id="char_input" style="border: 1px solid black;"></canvas>
-	<div id="char_choices"></div>
+<body style="margin: 0px 0px 0px 0px;">
+<div style="max-width:400px; margin:auto; width: 100%;" align="center">
+	<div width="100%" style="display: table; width: 100%;">
+		<div id="tab_xie" class="tab" >写</div>
+		<div id="tab_ci" class="tab" >词</div>
+		<div id="tab_zi" class="tab" >字</div>
+	</div>
+	<div id="div_input" width="100%" style="background-color: lightblue; padding: 3px;"><input style="width: 90%" id="input"></input></div>
+	<div id="div_canvas_input" width="100%">
+		<button id="clear_button">clear!</button><br />
+		<canvas id="char_input" style="border: 1px solid black;" width="1000" height="1000px"></canvas>
+		<div id="char_choices"></div>
+	</div>
+	<div id="div_output" width="100%"><table width="100%" style="border-collapse:collapse;"><thead>
+		<th style="width:25%;"></th>
+		<th style="width:25%;"></th>
+		<th style="width:50%;"></th>
+	</thead><tbody id="output" style="border-bottom: 1px solid black;"></tbody></table></div>
 </div>
-<div><table id="output"></table></div>
 <script src="cedict.js"></script>
 <script src="canvas.js"></script>
+<script src="general.js"></script>
 </body>
 </html>

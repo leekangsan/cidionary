@@ -8,9 +8,23 @@
 	var strokes = [];
 	var char_list= null;
 	var location = null;
+	
+	var touchGetLoc = function(e) {
+		e.preventDefault();
+		if(e.type != "touchstart" && e.type != "touchmove") {alert("not touch event");}
+		var px = e.touches[0].clientX;
+		var py = e.touches[0].clientY;
+		var rect = char_input.getBoundingClientRect();
+		var x = px - rect.left;
+		var y = py - rect.top;
+		return { x: x, y: y, time:(new Date).getTime()}
+	};
+	
+	var mouseGetLoc = function(e) {
+		return { x:e.offsetX, y:e.offsetY,  time:(new Date).getTime()};
+	};
 
-	var moveStroke = function(e2) {
-		var locNew = {x:e2.offsetX, y:e2.offsetY, time: (new Date).getTime()};
+	var moveStroke = function(locNew) {
 		currentStroke.push(locNew);
 		ctx.moveTo(location.x,location.y);
 		ctx.lineTo(locNew.x, locNew.y);
@@ -101,9 +115,6 @@
 				listStroke.map(function(listSubstroke,k) {
 					max = Math.max(clientStroke[k].r/norm, listSubstroke.r/char_list[i].norm);
 					min = Math.min(clientStroke[k].r/norm, listSubstroke.r/char_list[i].norm);
-// 					if (char_list[i].char == "休" || char_list[i].char == "阭") {
-// 						alert(char_list[i].char + "\n" + clientStroke[k].r/norm + " " + clientStroke[k].phi + "\n" + listSubstroke.r/char_list[i].norm + " " + listSubstroke.phi);
-// 					}
 					dotP += (min*(1/max) + Math.cos(clientStroke[k].phi-listSubstroke.phi))/listStroke.length;
 				});
 			});
@@ -119,22 +130,32 @@
 			}
 		});
 		//alert(matchList.slice(0,10).map(function(x) { x}));
-		char_choices.innerHTML = matchList2.slice(0,50).join(" ");
+		char_choices.innerHTML = "<span class=\"single_char\">"
+			+ matchList2.slice(0,50).join("</span> <span class=\"single_char\">")
+			+ "</span>";
+		var singles = document.getElementsByClassName("single_char");
+		var input = document.getElementById("input");
+		for (i=0; i<singles.length ; i++) {
+			singles[i].style.cursor = "pointer";
+			singles[i].style["font-size"] = "18pt";
+			singles[i].onclick = function(s) {
+				input.value = input.value + s.target.innerHTML };
+		};
 	};
 
-	var startStroke = function(e) {
-		location = {x:e.offsetX, y:e.offsetY, time : (new Date).getTime()};
-		currentStroke = [location];
+	var startStroke = function(loc) {
+		currentStroke = [loc];
+		location = loc;
 		//console.log(JSON.stringify(location));
 
-		char_input.onmousemove = moveStroke;
-		char_input.ontouchmove = moveStroke;
+		char_input.onmousemove = function(e) { moveStroke(mouseGetLoc(e)); };
+		char_input.ontouchmove = function(e) { moveStroke(touchGetLoc(e)); };
 		char_input.onmouseup = endStroke;
 		char_input.ontouchend = endStroke;
 		//alert(JSON.stringify(location));
 	};
-	char_input.onmousedown = startStroke;
-	char_input.ontouchstart = startStroke;
+	char_input.onmousedown = function(e) { startStroke(mouseGetLoc(e)); };
+	char_input.ontouchstart = function(e) { startStroke(touchGetLoc(e)); };
 	
 	clear_button.onclick = function(){
 		strokes = [];
