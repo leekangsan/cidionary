@@ -84,14 +84,27 @@
 		for (i = 0; i<char_list.length; i++){
 			var dotP = 0;
 			var listStrokes = char_list[i].strokes;
+			var norm = 0;
 			if (listStrokes.length != strokesInfos.length) { continue; }
 			listStrokes.map(function(listStroke, j) {
 				if (strokesInfos[j].length <= listStroke.length) { return; }
 				var clientStroke = strokesInfos[j][listStroke.length-1];
 				if (listStroke.length != clientStroke.length) { alert(listStroke + clientStroke); }
 				listStroke.map(function(listSubstroke,k) {
-					dotP += //clientStroke[k].r * listSubstroke.r *
-						Math.cos(clientStroke[k].phi-listSubstroke.phi);
+					norm += clientStroke[k].r;
+				});
+			});
+			listStrokes.map(function(listStroke, j) {
+				if (strokesInfos[j].length <= listStroke.length) { return; }
+				var clientStroke = strokesInfos[j][listStroke.length-1];
+				if (listStroke.length != clientStroke.length) { alert(listStroke + clientStroke); }
+				listStroke.map(function(listSubstroke,k) {
+					max = Math.max(clientStroke[k].r/norm, listSubstroke.r/char_list[i].norm);
+					min = Math.min(clientStroke[k].r/norm, listSubstroke.r/char_list[i].norm);
+// 					if (char_list[i].char == "休" || char_list[i].char == "阭") {
+// 						alert(char_list[i].char + "\n" + clientStroke[k].r/norm + " " + clientStroke[k].phi + "\n" + listSubstroke.r/char_list[i].norm + " " + listSubstroke.phi);
+// 					}
+					dotP += (min*(1/max) + Math.cos(clientStroke[k].phi-listSubstroke.phi))/listStroke.length;
 				});
 			});
 			matchList.push([dotP, char_list[i].char]);
@@ -124,27 +137,32 @@
 	char_input.ontouchstart = startStroke;
 	
 	clear_button.onclick = function(){
-		strokes = []
+		strokes = [];
+		strokesInfos = [];
 		currentStroke = null;
 		ctx.clearRect(0,0, char_input.width, char_input.height);
+		ctx.beginPath();
 	};
 
 	var myRequest = new XMLHttpRequest();
 	myRequest.onreadystatechange = function() {
 		if (myRequest.readyState != 4 || myRequest.status != 200) { return; }
 		var text = myRequest.responseText;
-		var lines = text.match(/^[0-9a-e]{2}.*$/mg);
+		var lines = text.match(/^[0-9a-f]{2}.*$/mg);
 		char_list = lines.map(function(line) {
+			var normalization = 0;
 			var strokes = line.split(" | ");
 			var char = String.fromCharCode(parseInt("0x" + strokes[0]));
+			
 			strokes2 = strokes.slice(1).map(function(stroke) {
 				var substrokes = stroke.split(" # ");
 				return substrokes.map(function(substroke) {
 					phir = substroke.slice(1,-1).split(",");
-					return { phi: phir[0], r: phir[1] };
+					normalization += parseFloat(phir[1]);
+					return { phi: parseFloat(phir[0]), r: parseFloat(phir[1]) };
 				});
 			});
-			return { strokes: strokes2, char: char }
+			return { strokes: strokes2, char: char, norm: normalization }
 			//alert(JSON.stringify(strokes2));
 		});
 	};
