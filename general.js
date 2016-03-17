@@ -6,7 +6,8 @@
 	var div_canvas_input = document.getElementById("div_canvas_input");
 	var div_output = document.getElementById("div_output");
 	var div_input = document.getElementById("div_input");
-	
+
+
 	function deactivateAll() {
 		div_canvas_input.style.display = "none";
 		div_input.style.display = "none";

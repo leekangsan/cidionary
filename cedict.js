@@ -1,5 +1,7 @@
 "use strict"
 
+var updateOutput = null;
+
 var cedict = function() {
 	var myRequest = new XMLHttpRequest();
 	var text = null;
@@ -109,21 +111,23 @@ var cedict = function() {
 		return { traditional: traditional, simplified: simplified, pinyin: pinyin, english: english }
 	}
 	
+	updateOutput = function() {
+		var output = document.getElementById("output");
+		var res = (text.match(new RegExp("^.*" + input.value + ".*$","mgi"))||["noResult noResult [,] /no results/"]);
+		output.innerHTML = res.slice(0,25).map(function(r) {
+			var r = parseLine(r);
+			if (r == null) { return ""; }
+			return "<tr class=\"dict_entry\">"+
+				"<td>" + r.simplified + "</td>" +
+				"<td>" + r.pinyin + "</td>" +
+				"<td>" + r.english +"</td>" + "</tr>"; }).join("");
+	}
+	
 	myRequest.onreadystatechange = function() {
 		if (myRequest.readyState != 4 || myRequest.status != 200) { return; }
 		text = myRequest.responseText
 		var input = document.getElementById("input");
-		input.oninput= function () {
-			var output = document.getElementById("output");
-			var res = (text.match(new RegExp("^.*" + input.value + ".*$","mgi"))||["noResult noResult [,] /no results/"]);
-			output.innerHTML = res.slice(0,25).map(function(r) {
-				var r = parseLine(r);
-				if (r == null) { return ""; }
-				return "<tr class=\"dict_entry\">"+
-					"<td>" + r.simplified + "</td>" +
-					"<td>" + r.pinyin + "</td>" +
-					"<td>" + r.english +"</td>" + "</tr>"; }).join("");
-		};
+		input.oninput= updateOutput;
 	};
 	myRequest.open('GET', 'cedict.txt', true);
 	myRequest.overrideMimeType("text/plain; charset=UTF-8");

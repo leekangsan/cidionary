@@ -1,7 +1,10 @@
 CACHE MANIFEST
-# 14-03-2016
+# 18-03-2016
 index.html
 strokes.txt
 cedict.txt
 canvas.js
 cedict.js
+general.js
+charRecog.js
+default.css
