@@ -5,24 +5,24 @@
 var char_list= null;
 
 function V2(x, y) {
-	console.assert(x.constructor == Number, "bad x in V2.minus" + JSON.stringify(x));
-	console.assert(y.constructor == Number, "bad y in V2.minus" + JSON.stringify(y));
+	//console.assert(x.constructor == Number, "bad x in V2.minus" + JSON.stringify(x));
+	//console.assert(y.constructor == Number, "bad y in V2.minus" + JSON.stringify(y));
 	this.x = x;
 	this.y = y;
 }
 
 V2.prototype.minus = function(v2) {
-	console.assert(v2.constructor == V2, "bad v2 in V2.minus");
+	//console.assert(v2.constructor == V2, "bad v2 in V2.minus");
 	return new V2(this.x - v2.x, this.y - v2.y);
 }
 
 V2.prototype.plus = function(v2) {
-	console.assert(v2.constructor == V2, "bad v2 in V2.plus");
+	//console.assert(v2.constructor == V2, "bad v2 in V2.plus");
 	return new V2(this.x + v2.x, this.y + v2.y);
 }
 
 V2.prototype.multiply = function(constant) {
-	console.assert(constant.constructor == Number, "bad number in V2.plus: " + JSON.stringify(constant));
+	//console.assert(constant.constructor == Number, "bad number in V2.plus: " + JSON.stringify(constant));
 	return new V2(constant * this.x, constant * this.y);
 }
 
@@ -37,8 +37,8 @@ V2.prototype.toPolar = function() {
 }
 
 function Polar(r, phi) {
-	console.assert(r.constructor == Number, "bad r in Polar.minus" + JSON.stringify(r));
-	console.assert(phi.constructor == Number, "bad phi in Polar.minus" + JSON.stringify(phi));
+	//console.assert(r.constructor == Number, "bad r in Polar.minus" + JSON.stringify(r));
+	//console.assert(phi.constructor == Number, "bad phi in Polar.minus" + JSON.stringify(phi));
 	this.r = r;
 	this.phi = phi;
 }
@@ -51,11 +51,11 @@ Polar.prototype.toV2 = function() {
 // e.g. { arc = 1.35, subStrokes = [ Polar(..), .. ] }
 // arc is always the sum of all r's
 function KnownStroke(subStrokes, arc) {
-	console.assert(arc.constructor == Number, "bad arc in KnownStroke");
-	console.assert(subStrokes.constructor == Array, "bad substrokes in KnownStroke");
-	for (var sub of subStrokes) {
-		console.assert(sub.constructor == Polar, "bad substroke in KnownStroke" + JSON.stringify(sub));
-	}
+	//console.assert(arc.constructor == Number, "bad arc in KnownStroke");
+	//console.assert(subStrokes.constructor == Array, "bad substrokes in KnownStroke");
+	//for (var sub of subStrokes) {
+	//	console.assert(sub.constructor == Polar, "bad substroke in KnownStroke" + JSON.stringify(sub));
+	//}
 	this.subStrokes = subStrokes;
 	this.arc = arc;
 }
@@ -63,12 +63,12 @@ function KnownStroke(subStrokes, arc) {
 // A known char from "strokes.txt"
 // e.g. {arc = 14, char = "我", strokes = [KnownStroke(...), ....] }
 function KnownChar(strokes, arc, char) {
-	console.assert(strokes.constructor == Array, "bad substrokes in KnownChar: " + strokes);
-	for (var stroke of strokes) {
-		console.assert(stroke.constructor == KnownStroke, "bad substroke in KnownChar");
-	}
-	console.assert(arc.constructor == Number, "bad arc in KnownChar");
-	console.assert(char.constructor == String, "bad char in KnownChar:" + char);
+	// console.assert(strokes.constructor == Array, "bad substrokes in KnownChar: " + strokes);
+	// for (var stroke of strokes) {
+	// 	console.assert(stroke.constructor == KnownStroke, "bad substroke in KnownChar");
+	// }
+	// console.assert(arc.constructor == Number, "bad arc in KnownChar");
+	// console.assert(char.constructor == String, "bad char in KnownChar:" + char);
 	
 	this.strokes = strokes;
 	this.arc = arc;
