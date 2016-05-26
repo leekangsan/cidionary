@@ -1,7 +1,7 @@
 (function() {	
 	if(typeof(Worker) ==  "undefined")
 		{ alert("Your browser doesn't support webworkers. Bad browser.") }
-	var charRecogWorker = new Worker("charRecog.js");
+	var charRecogWorker = new Worker("CharRecog/charRecog.js");
 	var char_input = document.getElementById("char_input");
 	var clear_button = document.getElementById("clear_button");
 	var char_choices = document.getElementById("char_choices");

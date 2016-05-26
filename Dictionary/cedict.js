@@ -129,7 +129,7 @@ var cedict = function() {
 		var input = document.getElementById("input");
 		input.oninput= updateOutput;
 	};
-	myRequest.open('GET', 'cedict.txt', true);
+	myRequest.open('GET', 'Dictionary/cedict.txt', true);
 	myRequest.overrideMimeType("text/plain; charset=UTF-8");
 	myRequest.send();
 	
