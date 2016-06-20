@@ -202,6 +202,7 @@ myRequest.onreadystatechange = function() {
 		return new KnownChar(strokes2, charArc, char);
 		//alert(JSON.stringify(strokes2));
 	});
+	console.log("character recognition loaded");
 	postMessage([]);
 };
 myRequest.open('GET', 'strokes.txt', true);

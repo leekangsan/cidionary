@@ -1,68 +1,30 @@
 "use strict"
 
+function escapeHtml(unsafe) {
+	return unsafe
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#039;");
+}
+
+if(typeof(Worker) ==  "undefined")
+	{ alert("Your browser doesn't support webworkers. Bad browser.") }
+var cedictWorker = new Worker("Dictionary/cedictWorker.js");
+
 var updateOutput = null;
 
-var cedict = function() {
-	var myRequest = new XMLHttpRequest();
-	var text = null;
+(function() {
+	var input = document.getElementById("input");
+	var workerWorking = false;
+	var inputChanged = false;
 
-	var silableList = [
-															"zhi",	"chi",	"shi",	"ri",	"zi",	"ci",	"si",
-	"a",	"ba",	"pa",	"ma",	"fa",	"da",	"ta",	"na",	"la",	"ga",	"ka",	"ha",				"zha",	"cha",	"sha",	"za",		"ca",	"sa",
-	"o",	"bo",	"po",	"mo",	"fo",				"lo",
-	"e",			"me",		"de",	"te",	"ne",	"le",	"ge",	"ke",	"he",				"zhe",	"che",	"she",	"re",	"ze",	"ce",	"se",
-	"ai",	"bai",	"pai",	"mai",		"dai",	"tai",	"nai",	"lai",	"gai",	"kai",	"hai",				"zhai",	"chai",	"shai",		"zai",	"cai",	"sai",
-	"ei",	"bei",	"pei",	"mei",	"fei",	"dei",	"tei",	"nei",	"lei",	"gei",	"kei",	"hei",				"zhei",		"shei",		"zei",		"sei",
-	"ao",	"bao",	"pao",	"mao",		"dao",	"tao",	"nao",	"lao",	"gao",	"kao",	"hao",				"zhao",	"chao",	"shao",	"rao",	"zao",	"cao",	"sao",
-	"ou",		"pou",	"mou",	"fou",	"dou",	"tou",	"nou",	"lou",	"gou",	"kou",	"hou",				"zhou",	"chou",	"shou",	"rou",	"zou",	"cou",	"sou",
-	"an",	"ban",	"pan",	"man",	"fan",	"dan",	"tan",	"nan",	"lan",	"gan",	"kan",	"han",				"zhan",	"chan",	"shan",	"ran",	"zan",	"can",	"san",
-	"en",	"ben",	"pen",	"men",	"fen",	"den",		"nen",		"gen",	"ken",	"hen",				"zhen",	"chen",	"shen",	"ren",	"zen",	"cen",	"sen",
-	"ang",	"bang",	"pang",	"mang",	"fang",	"dang",	"tang",	"nang",	"lang",	"gang",	"kang",	"hang",				"zhang",	"chang",	"shang",	"rang",	"zang",	"cang",	"sang",
-	"eng",	"beng",	"peng",	"meng",	"feng",	"deng",	"teng",	"neng",	"leng",	"geng",	"keng",	"heng",				"zheng",	"cheng",	"sheng",	"reng",	"zeng",	"ceng",	"seng",
-	"er",
-	"yi",	"bi",	"pi",	"mi",		"di",	"ti",	"ni",	"li",				"ji",	"qi",	"xi",
-	"ya",					"dia",		"nia",	"lia",				"jia",	"qia",	"xia",
-	"yo",
-	"ye",	"bie",	"pie",	"mie",		"die",	"tie",	"nie",	"lie",				"jie",	"qie",	"xie",
-	"yai",
-	"yao",	"biao",	"piao",	"miao",	"fiao",	"diao",	"tiao",	"niao",	"liao",				"jiao",	"qiao",	"xiao",
-	"you",			"miu",		"diu",		"niu",	"liu",				"jiu",	"qiu",	"xiu",
-	"yan",	"bian",	"pian",	"mian",		"dian",	"tian",	"nian",	"lian",				"jian",	"qian",	"xian",
-	"yin",	"bin",	"pin",	"min",				"nin",	"lin",				"jin",	"qin",	"xin",
-	"yang",	"biang",				"diang",		"niang",	"liang",				"jiang",	"qiang",	"xiang",
-	"ying",	"bing",	"ping",	"ming",		"ding",	"ting",	"ning",	"ling",				"jing",	"qing",	"xing",
-	"wu",	"bu",	"pu",	"mu",	"fu",	"du",	"tu",	"nu",	"lu",	"gu",	"ku",	"hu",				"zhu",	"chu",	"shu",	"ru",	"zu",	"cu",	"su",
-	"wa",									"gua",	"kua",	"hua",				"zhua",	"chua",	"shua",	"rua",
-	"wo",					"duo",	"tuo",	"nuo",	"luo",	"guo",	"kuo",	"huo",				"zhuo",	"chuo",	"shuo",	"ruo",	"zuo",	"cuo",	"suo",
-	"wai",									"guai",	"kuai",	"huai",				"zhuai",	"chuai",	"shuai",
-	"wei",					"dui",	"tui",			"gui",	"kui",	"hui",				"zhui",	"chui",	"shui",	"rui",	"zui",	"cui",	"sui",
-	"wan",					"duan",	"tuan",	"nuan",	"luan",	"guan",	"kuan",	"huan",				"zhuan",	"chuan",	"shuan",	"ruan",	"zuan",	"cuan",	"suan",
-	"wen",					"dun",	"tun",	"nun",	"lun",	"gun",	"kun",	"hun",				"zhun",	"chun",	"shun",	"run",	"zun",	"cun",	"sun",
-	"wang",									"guang",	"kuang",	"huang",				"zhuang",	"chuang",	"shuang",
-	"weng",					"dong",	"tong",	"nong",	"long",	"gong",	"kong",	"hong",				"zhong",	"chong",	"shong",	"rong",	"zong",	"cong",	"song",
-	"yu",							"nü",	"lü",				"ju",	"qu",	"xu",
-	"yue",							"nüe",	"lüe",				"jue",	"que",	"xue",
-	"yuan",												"juan",	"quan",	"xuan",
-	"yun",								"lün",				"jun",	"qun",	"xun",
-	"yong",												"jiong",	"qiong",	"xiong"]
-
-	function uColonToUe(sil) {
-		
-	}
-
-	// takes "tong3" to "tong"
-	function placeTone(silable) {
-		if (/^[a-zA-Z·,]$/.test(silable)) { return silable; }
-		var sil = silable.slice(0,-1);
-		if (sil == "r") { return sil; }
+	function placeTone(pinyin) {
+		if (pinyin.tone === null || pinyin.tone === 5) { return pinyin.silable; }
+		var sil = pinyin.silable;
 		sil = sil.replace("u:", "ü");
-		var tone = silable.slice(-1);
-		var tone = parseInt(tone);
-		if (
-			(silableList.indexOf(sil) === -1
-			&& (silableList.indexOf(sil.slice(0,-1)) === -1 || sil[-1] !="r")
-			)
-			|| isNaN(tone)) { alert(silable + " is not a proper silable"); }
+		var tone = pinyin.tone;
 		
 		var tonePos = null;
 		var indexA = sil.indexOf("a");
@@ -91,48 +53,37 @@ var cedict = function() {
 		return ret;
 	}
 
-	function parseLine(line) {
-		var rest = line;
-		var index = null;
-		var index2 = null;
-		if (rest.substring(0,1) === "#" || rest === "") { return null; }
-		index = rest.indexOf(" ");
-		var traditional = rest.substring(0,index);
-		rest = rest.substring(index+1,rest.length);
-		index = rest.indexOf(" ");
-		var simplified = rest.substring(0,index);
-		rest = rest.substring(index+1,rest.length);
-		index = rest.indexOf("[");
-		index2 = rest.indexOf("]");
-		var pinyin = rest.substring(index+1, index2);
-		pinyin = pinyin.split(" ").map(function(sil) { return placeTone(sil.toLowerCase()) ;}).join("<wbr />");
-		rest = rest.substring(index2+2,rest.length);
-		var english = rest.substring(1,rest.length-1).split("/").join("/<br />");
-		return { traditional: traditional, simplified: simplified, pinyin: pinyin, english: english }
+	var updateOutput = function(entries) {
+		var html = "";
+		for (var r of entries) {
+			html = html.concat("<tr class=\"dict_entry\">"+
+				"<td>" + escapeHtml(r.simplified) + "</td>" +
+				"<td>" + r.pinyin.map(placeTone).join(" ") + "</td>" +
+				"<td>" + r.english.map(escapeHtml).join("<br>") +"</td>"
+				+ "</tr>");
+		}
+		output.innerHTML = html;
 	}
-	
-	updateOutput = function() {
-		var output = document.getElementById("output");
-		var res = (text.match(new RegExp("^.*" + input.value + ".*$","mgi"))||["noResult noResult [,] /no results/"]);
-		output.innerHTML = res.slice(0,25).map(function(r) {
-			var r = parseLine(r);
-			if (r == null) { return ""; }
-			return "<tr class=\"dict_entry\">"+
-				"<td>" + r.simplified + "</td>" +
-				"<td>" + r.pinyin + "</td>" +
-				"<td>" + r.english +"</td>" + "</tr>"; }).join("");
-	}
-	
-	myRequest.onreadystatechange = function() {
-		if (myRequest.readyState != 4 || myRequest.status != 200) { return; }
-		text = myRequest.responseText
-		var input = document.getElementById("input");
-		input.oninput= updateOutput;
-	};
-	myRequest.open('GET', 'Dictionary/cedict.txt', true);
-	myRequest.overrideMimeType("text/plain; charset=UTF-8");
-	myRequest.send();
-	
 
-	return { text: text };
-} ()
+	var onInputWork = function() {
+		if (workerWorking) {
+			inputChanged = true;
+		} else {
+			cedictWorker.postMessage(input.value);
+			workerWorking = true;
+		}
+	};
+	
+	cedictWorker.onmessage = function(message) {
+		workerWorking = false;
+		if (inputChanged) {
+			cedictWorker.postMessage(input.value);
+			workerWorking = true;
+			inputChanged = false;
+		}
+		updateOutput(message.data);
+	};
+	
+	input.oninput = onInputWork;
+	//onInputWork();
+}());
