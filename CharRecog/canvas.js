@@ -55,7 +55,7 @@
 			singles[i].style["font-size"] = "18pt";
 			singles[i].onclick = function(s) {
 				input.value = input.value + s.target.innerHTML
-				updateOutput();
+				input.oninput();
 			};
 		};
 	};

@@ -9,16 +9,19 @@ function escapeHtml(unsafe) {
 		.replace(/'/g, "&#039;");
 }
 
-if(typeof(Worker) ==  "undefined")
-	{ alert("Your browser doesn't support webworkers. Bad browser.") }
-var cedictWorker = new Worker("Dictionary/cedictWorker.js");
-
-var updateOutput = null;
-
 (function() {
+	if(typeof(Worker) ==  "undefined")
+		{ alert("Your browser doesn't support webworkers. Bad browser.") }
+	var cedictWorker = new Worker("Dictionary/cedictWorker.js");
+
 	var input = document.getElementById("input");
-	var workerWorking = false;
-	var inputChanged = false;
+	var states = {
+		STATE_WEBWORKER_SETUP : "state_webworker_setup",
+		STATE_OUTDATED : "state_outdated", // webworker is working and result will already be outdated
+		STATE_WAITING_WEBWORKER : "state_waiting_webworker", // webworker is working result won't wont be outdated
+		STATE_OK : "state_ok" // everything is up to date webworker is not working
+	}
+	var state = states.STATE_WEBWORKER_SETUP;
 
 	function placeTone(pinyin) {
 		if (pinyin.tone === null || pinyin.tone === 5) { return pinyin.silable; }
@@ -62,28 +65,48 @@ var updateOutput = null;
 				"<td>" + r.english.map(escapeHtml).join("<br>") +"</td>"
 				+ "</tr>");
 		}
+		var output = document.getElementById("output");
 		output.innerHTML = html;
 	}
 
-	var onInputWork = function() {
-		if (workerWorking) {
-			inputChanged = true;
-		} else {
-			cedictWorker.postMessage(input.value);
-			workerWorking = true;
+	input.oninput = function() {
+		switch (state) {
+			case states.STATE_WEBWORKER_SETUP:
+				break;
+			case states.STATE_OUTDATED:
+				break;
+			case states.STATE_WAITING_WEBWORKER:
+				state = states.STATE_OUTDATED;
+				break;
+			case states.STATE_OK:
+				cedictWorker.postMessage(input.value);
+				state = states.STATE_WAITING_WEBWORKER;
+				break;
 		}
 	};
 	
 	cedictWorker.onmessage = function(message) {
-		workerWorking = false;
-		if (inputChanged) {
-			cedictWorker.postMessage(input.value);
-			workerWorking = true;
-			inputChanged = false;
+		switch (state) {
+			case states.STATE_OK:
+				alert("this should not happen");
+				break;
+			case states.STATE_WEBWORKER_SETUP:
+				document.getElementById("output_loading").style.display = "none";
+				if (message.data != "ready") {
+					alert(message.data);
+				}
+				cedictWorker.postMessage(input.value);
+				state = states.STATE_WAITING_WEBWORKER
+				break;
+			case states.STATE_WAITING_WEBWORKER:
+				updateOutput(message.data)
+				state = states.STATE_OK;
+				break;
+			case states.STATE_OUTDATED:
+				cedictWorker.postMessage(input.value);
+				updateOutput(message.data)
+				state = states.STATE_WAITING_WEBWORKER;
+				break;
 		}
-		updateOutput(message.data);
 	};
-	
-	input.oninput = onInputWork;
-	//onInputWork();
 }());

@@ -85,6 +85,7 @@ myRequest.onreadystatechange = function() {
 		}
 	}
 	console.log("dictionary loaded");
+	postMessage("ready");
 	onmessage = function(e) { matchAndSend(e.data); };
 };
 
