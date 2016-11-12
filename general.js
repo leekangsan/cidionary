@@ -1,3 +1,7 @@
+if(!window.indexedDB) {
+    alert("IndexedDB is not supported on your browser. It is needed to store the dictionary");
+}
+
 (function () {
 	var tab_xie = document.getElementById("tab_xie");
 	var tab_ci = document.getElementById("tab_ci");

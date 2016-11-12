@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html manifest="fanslate.appcache">
+<html> <!-- manifest="fanslate.appcache" -->
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -19,14 +19,17 @@
 		<canvas id="char_input" style="border: 1px solid black;" width="1000" height="1000px"></canvas>
 		<div id="char_choices">Chars not loaded yet!</div>
 	</div>
-	<div id="div_output" width="100%"><table width="100%" style="border-collapse:collapse;"><thead>
-		<th style="width:25%;"></th>
-		<th style="width:25%;"></th>
-		<th style="width:50%;"></th>
-	</thead><tbody id="output" style="border-bottom: 1px solid black;"></tbody></table></div>
+	<div id="div_output" width="100%">
+		<p id="output_loading">Dictionary is not loaded yet. The first time this can take quite some time. Especially on a smart phone.</p>
+		<table width="100%" style="border-collapse:collapse;"><thead>
+			<th style="width:25%;"></th>
+			<th style="width:25%;"></th>
+			<th style="width:50%;"></th>
+		</thead><tbody id="output" style="border-bottom: 1px solid black;"></tbody></table>
+	</div>
 </div>
 <script src="general.js"></script>
 <script src="Dictionary/cedict.js"></script><!-- needs to be before canvas -->
-<script src="CharRecog/canvas.js"></script>
+<!-- script src="CharRecog/canvas.js"></script -->
 </body>
 </html>
