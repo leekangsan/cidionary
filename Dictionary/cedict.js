@@ -62,7 +62,7 @@ function escapeHtml(unsafe) {
 			html = html.concat("<tr class=\"dict_entry\">"+
 				"<td>" + escapeHtml(r.simplified) + "</td>" +
 				"<td>" + r.pinyin.map(placeTone).join(" ") + "</td>" +
-				"<td>" + r.english.map(escapeHtml).join("<br>") +"</td>"
+				"<td>" + r.english.map(escapeHtml).join("/<br>") +"</td>"
 				+ "</tr>");
 		}
 		var output = document.getElementById("output");
